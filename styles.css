@@ -236,3 +236,63 @@ code { color: var(--accent); font-family: var(--font-mono); }
 #palList li { padding: .7rem 1rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: .7rem; color: var(--text-color); }
 #palList li i { color: var(--primary); font-size: 1.2rem; }
 #palList li.sel, #palList li:hover { background: color-mix(in srgb, var(--primary) 16%, transparent); }
+/* ==========================================
+   NUEVAS REGLAS: ENRUTADOR SPA Y RESPONSIVE
+   ========================================== */
+
+/* Ocultar todas las secciones por defecto, excepto la activa */
+.app-view {
+    display: none;
+    padding: 120px 5% 70px; /* Espacio para que no choque con el navbar */
+    min-height: 100vh;
+    animation: fadeInView 0.4s ease forwards;
+}
+
+.app-view.active {
+    display: block;
+}
+
+@keyframes fadeInView {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Arreglar el menú hamburguesa en móvil (ya que no usas Bootstrap JS) */
+@media (max-width: 991px) {
+    .navbar-collapse {
+        display: none;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        padding: 1rem;
+        border-radius: 12px;
+        margin-top: 1rem;
+        border: 1px solid var(--glass-border);
+    }
+    .navbar-collapse.show {
+        display: block !important;
+    }
+    .navbar-nav {
+        gap: 0.5rem !important;
+    }
+    .nav-link {
+        padding: 0.5rem 1rem;
+    }
+    /* Ajustes del Hero en celular */
+    .hero-content {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .carousel-wrapper {
+        height: 250px;
+        margin-top: 2rem;
+    }
+    .card-3d { width: 85%; }
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Botón de conóceme (arreglado para SPA) */
+.btn-primary {
+    cursor: pointer;
+}

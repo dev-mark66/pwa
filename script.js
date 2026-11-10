@@ -24,22 +24,52 @@ themeBtn.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 2. MENÚ HAMBURGUESA (Ejemplo 3): classList.toggle('show')
+// 2. ENRUTADOR SPA (Muestra solo una sección a la vez)
 // ==========================================
-const burgerBtn = document.getElementById('burgerBtn');
 const navMenu = document.getElementById('navMenu');
+const burgerBtn = document.getElementById('burgerBtn');
+
+function navigateTo(targetId) {
+    // 1. Ocultar todas las vistas
+    document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
+
+    // 2. Mostrar la vista seleccionada
+    const targetView = document.getElementById(targetId);
+    if (targetView) {
+        targetView.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Subir al inicio de la página
+    }
+
+    // 3. Actualizar clases activas en el menú
+    document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.target === targetId);
+    });
+
+    // 4. Cerrar menú móvil si está abierto
+    navMenu.classList.remove('show');
+    burgerBtn.setAttribute('aria-expanded', false);
+    burgerBtn.querySelector('i').className = 'ph ph-list';
+}
+
+// Escuchar clics en enlaces del menú y botones con data-target
+document.querySelectorAll('[data-target]').forEach(el => {
+    el.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateTo(el.dataset.target);
+    });
+});
+
+// ==========================================
+// 3. MENÚ HAMBURGUESA (Móvil)
+// ==========================================
 burgerBtn.addEventListener('click', () => {
     const open = navMenu.classList.toggle('show');
     burgerBtn.setAttribute('aria-expanded', open);
     burgerBtn.querySelector('i').className = open ? 'ph ph-x' : 'ph ph-list';
 });
-navMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    navMenu.classList.remove('show'); burgerBtn.setAttribute('aria-expanded', false);
-    burgerBtn.querySelector('i').className = 'ph ph-list';
-}));
 
 // ==========================================
-// 3. FILTRO DE JUEGOS (Ejemplo 2): dataset + style.display
+// 4. FILTRO DE JUEGOS (Ejemplo 2)
 // ==========================================
 const tarjetas = document.querySelectorAll('.juego-card');
 const botonesFiltro = document.querySelectorAll('#juegos .btn');
@@ -65,7 +95,7 @@ function filtrarJuegos(categoria, btn) {
 botonesFiltro.forEach(btn => btn.addEventListener('click', () => filtrarJuegos(btn.dataset.filtro, btn)));
 
 // ==========================================
-// 4. VALIDACIÓN DE FORMULARIO (Ejemplo 4)
+// 5. VALIDACIÓN DE FORMULARIO (Ejemplo 4)
 // ==========================================
 const form = document.getElementById('contactForm');
 const alertBox = document.getElementById('alertBox');
@@ -89,65 +119,70 @@ function validateField({ el, err, ok, msg }) {
 }
 campos.forEach(c => c.el.addEventListener('input', () => validateField(c)));
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault(); // Detiene la recarga automática
-    const resultados = campos.map(validateField);
-    if (resultados.every(Boolean)) {
-        const nombre = campos[0].el.value.trim().replace(/[<>&]/g, '');
-        alertBox.innerHTML = `<p class="msg-exito"><i class="ph ph-check-circle"></i> ¡Gracias ${nombre}, tu propuesta ha sido enviada!</p>`;
-        form.reset();
-        campos.forEach(c => c.el.classList.remove('input-success'));
-    } else {
-        alertBox.innerHTML = `<p class="msg-error-box"><i class="ph ph-warning"></i> Revisa los campos marcados en rojo.</p>`;
-    }
-});
+if(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const resultados = campos.map(validateField);
+        if (resultados.every(Boolean)) {
+            const nombre = campos[0].el.value.trim().replace(/[<>&]/g, '');
+            alertBox.innerHTML = `<p class="msg-exito"><i class="ph ph-check-circle"></i> ¡Gracias ${nombre}, tu propuesta ha sido enviada!</p>`;
+            form.reset();
+            campos.forEach(c => c.el.classList.remove('input-success'));
+        } else {
+            alertBox.innerHTML = `<p class="msg-error-box"><i class="ph ph-warning"></i> Revisa los campos marcados en rojo.</p>`;
+        }
+    });
+}
 
 // ==========================================
-// EXTRAS: CARRUSEL 3D
+// EXTRAS: CARRUSEL 3D, TYPEWRITER, REVEAL, etc.
 // ==========================================
 const cards = document.querySelectorAll('.card-3d');
 const dotsBox = document.getElementById('dots');
 const wrapper = document.querySelector('.carousel-wrapper');
 let currentIndex = 0, autoplay;
 
-cards.forEach((_, i) => {
-    const d = document.createElement('span');
-    d.addEventListener('click', () => goTo(i));
-    dotsBox.appendChild(d);
-});
-function updateCarousel() {
-    cards.forEach((card, i) => {
-        card.classList.remove('active', 'prev', 'next');
-        if (i === currentIndex) card.classList.add('active');
-        else if (i === (currentIndex - 1 + cards.length) % cards.length) card.classList.add('prev');
-        else card.classList.add('next');
+if (cards.length > 0 && dotsBox) {
+    cards.forEach((_, i) => {
+        const d = document.createElement('span');
+        d.addEventListener('click', () => goTo(i));
+        dotsBox.appendChild(d);
     });
-    [...dotsBox.children].forEach((d, i) => d.classList.toggle('on', i === currentIndex));
+    function updateCarousel() {
+        cards.forEach((card, i) => {
+            card.classList.remove('active', 'prev', 'next');
+            if (i === currentIndex) card.classList.add('active');
+            else if (i === (currentIndex - 1 + cards.length) % cards.length) card.classList.add('prev');
+            else card.classList.add('next');
+        });
+        [...dotsBox.children].forEach((d, i) => d.classList.toggle('on', i === currentIndex));
+    }
+    function goTo(i) { currentIndex = (i + cards.length) % cards.length; updateCarousel(); }
+    function rotateCarousel(dir) { goTo(currentIndex + dir); }
+    function startAuto() { stopAuto(); autoplay = setInterval(() => rotateCarousel(1), 4000); }
+    function stopAuto() { clearInterval(autoplay); }
+
+    document.getElementById('prevBtn').addEventListener('click', () => rotateCarousel(-1));
+    document.getElementById('nextBtn').addEventListener('click', () => rotateCarousel(1));
+    cards.forEach((c, i) => c.addEventListener('click', () => goTo(i)));
+    wrapper.addEventListener('mouseenter', stopAuto);
+    wrapper.addEventListener('mouseleave', startAuto);
+
+    let startX = 0;
+    wrapper.addEventListener('pointerdown', e => startX = e.clientX);
+    wrapper.addEventListener('pointerup', e => { const dx = e.clientX - startX; if (Math.abs(dx) > 50) rotateCarousel(dx < 0 ? 1 : -1); });
+    document.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') rotateCarousel(-1); if (e.key === 'ArrowRight') rotateCarousel(1); });
+
+    updateCarousel(); startAuto();
 }
-function goTo(i) { currentIndex = (i + cards.length) % cards.length; updateCarousel(); }
-function rotateCarousel(dir) { goTo(currentIndex + dir); }
-function startAuto() { stopAuto(); autoplay = setInterval(() => rotateCarousel(1), 4000); }
-function stopAuto() { clearInterval(autoplay); }
 
-document.getElementById('prevBtn').addEventListener('click', () => rotateCarousel(-1));
-document.getElementById('nextBtn').addEventListener('click', () => rotateCarousel(1));
-cards.forEach((c, i) => c.addEventListener('click', () => goTo(i)));
-wrapper.addEventListener('mouseenter', stopAuto);
-wrapper.addEventListener('mouseleave', startAuto);
-let startX = 0;
-wrapper.addEventListener('pointerdown', e => startX = e.clientX);
-wrapper.addEventListener('pointerup', e => { const dx = e.clientX - startX; if (Math.abs(dx) > 50) rotateCarousel(dx < 0 ? 1 : -1); });
-document.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') rotateCarousel(-1); if (e.key === 'ArrowRight') rotateCarousel(1); });
-updateCarousel(); startAuto();
-
-// ==========================================
-// EXTRAS: TYPEWRITER
-// ==========================================
+// Typewriter
 const textElement = document.getElementById('typewriter');
 const textArray = ["Ingeniero en Sistemas.", "Desarrollador Full Stack.", "Creador de APKs.", "Entusiasta de Kali Linux."];
 let textIndex = 0, charIndex = 0, isDeleting = false;
 
 function type() {
+    if(!textElement) return;
     const current = textArray[textIndex];
     charIndex += isDeleting ? -1 : 1;
     textElement.textContent = current.substring(0, charIndex);
@@ -156,11 +191,9 @@ function type() {
     else if (isDeleting && charIndex === 0) { isDeleting = false; textIndex = (textIndex + 1) % textArray.length; speed = 400; }
     setTimeout(type, speed);
 }
-document.addEventListener('DOMContentLoaded', () => setTimeout(type, 800));
+if(textElement) document.addEventListener('DOMContentLoaded', () => setTimeout(type, 800));
 
-// ==========================================
-// EXTRAS: SCROLL REVEAL + barras animadas y contadores
-// ==========================================
+// Reveal y contadores
 function animateSkill(box) {
     box.querySelectorAll('.progress').forEach(p => p.style.width = p.dataset.w + '%');
     box.querySelectorAll('.count').forEach(c => {
@@ -169,19 +202,8 @@ function animateSkill(box) {
         requestAnimationFrame(step);
     });
 }
-const revealObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('active');
-        if (entry.target.classList.contains('skill-container')) animateSkill(entry.target);
-        revealObserver.unobserve(entry.target);
-    });
-}, { threshold: 0.15 });
-document.querySelectorAll('.reveal').forEach((el, i) => { el.style.transitionDelay = (i % 4) * 90 + 'ms'; revealObserver.observe(el); });
 
-// ==========================================
-// EXTRAS: Tilt 3D + luz en tarjetas, spotlight, navbar y progreso
-// ==========================================
+// Tilt 3D, Scroll y Buscador (Mantenidos de tu código original)
 document.querySelectorAll('.tilt').forEach(card => {
     card.addEventListener('pointermove', e => {
         const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
@@ -198,47 +220,33 @@ addEventListener('pointermove', e => {
 
 const navbar = document.getElementById('navbar');
 addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', scrollY > 30);
+    if(navbar) navbar.classList.toggle('scrolled', scrollY > 30);
     const max = document.documentElement.scrollHeight - innerHeight;
     document.documentElement.style.setProperty('--p', max > 0 ? scrollY / max : 0);
 }, { passive: true });
 
-// Enlace activo según la sección visible
-const links = document.querySelectorAll('.navbar-nav .nav-link');
-const secObserver = new IntersectionObserver(entries => {
-    entries.forEach(en => { if (en.isIntersecting) links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + en.target.id)); });
-}, { rootMargin: '-45% 0px -50% 0px' });
-document.querySelectorAll('main section[id]').forEach(s => secObserver.observe(s));
-
-// Horario: resalta la fila de la hora actual
 function markNow() {
     const d = new Date(), m = d.getHours() * 60 + d.getMinutes();
     document.querySelectorAll('#schedule tr').forEach(tr => tr.classList.toggle('now', m >= +tr.dataset.start && m < +tr.dataset.end));
 }
 markNow(); setInterval(markNow, 60000);
+if(document.getElementById('year')) document.getElementById('year').textContent = new Date().getFullYear();
 
-document.getElementById('year').textContent = new Date().getFullYear();
-
-// ==========================================
-// NUEVO 2026 A: Marquesina infinita (clona el contenido)
-// ==========================================
 const track = document.getElementById('marquee');
-[...track.children].forEach(n => { const c = n.cloneNode(true); c.setAttribute('aria-hidden', 'true'); track.appendChild(c); });
+if(track) [...track.children].forEach(n => { const c = n.cloneNode(true); c.setAttribute('aria-hidden', 'true'); track.appendChild(c); });
 
-// ==========================================
-// NUEVO 2026 B: Buscador rápido Ctrl+K con <dialog>
-// ==========================================
+// Buscador
 const palette = document.getElementById('palette');
 const palInput = document.getElementById('palInput');
 const palList = document.getElementById('palList');
-const irA = id => () => document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+const irA = id => () => navigateTo(id); // Ahora usa navigateTo
 const acciones = [
     ['ph-house', 'Inicio', irA('inicio')], ['ph-game-controller', 'Pasatiempos', irA('pasatiempos')],
     ['ph-rocket-launch', 'Intereses', irA('intereses')], ['ph-clock-user', 'Horario', irA('horario')],
-    ['ph-music-notes', 'Música y Favoritos', irA('musica')], ['ph-trophy', 'Juegos', irA('juegos')],
-    ['ph-quotes', 'Frase y Stack', irA('frase')], ['ph-terminal-window', 'Terminal', irA('terminal')],
-    ['ph-question', 'Preguntas Frecuentes', irA('faq')], ['ph-envelope-simple', 'Contacto', irA('contacto')],
-    ['ph-circle-half', 'Cambiar tema claro/oscuro', () => themeBtn.click()]
+    ['ph-music-notes', 'Música', irA('musica')], ['ph-trophy', 'Juegos', irA('juegos')],
+    ['ph-terminal-window', 'Terminal', irA('terminal')], ['ph-question', 'FAQ', irA('faq')],
+    ['ph-envelope-simple', 'Contacto', irA('contacto')],
+    ['ph-circle-half', 'Cambiar tema', () => themeBtn.click()]
 ];
 let sel = 0, vista = acciones;
 function pintarPalette() {
@@ -252,63 +260,65 @@ function pintarPalette() {
         palList.appendChild(li);
     });
 }
-function abrirPalette() { palInput.value = ''; vista = acciones; sel = 0; pintarPalette(); palette.showModal(); palInput.focus(); }
-document.getElementById('paletteBtn').addEventListener('click', abrirPalette);
-addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palette.open ? palette.close() : abrirPalette(); } });
-palette.addEventListener('click', e => { if (e.target === palette) palette.close(); });
-palInput.addEventListener('input', () => { vista = acciones.filter(a => a[1].toLowerCase().includes(palInput.value.toLowerCase())); sel = 0; pintarPalette(); });
-palInput.addEventListener('keydown', e => {
-    if (e.key === 'ArrowDown') { sel = (sel + 1) % vista.length; pintarPalette(); e.preventDefault(); }
-    if (e.key === 'ArrowUp') { sel = (sel - 1 + vista.length) % vista.length; pintarPalette(); e.preventDefault(); }
-    if (e.key === 'Enter' && vista[sel]) { palette.close(); vista[sel][2](); }
-});
+if(document.getElementById('paletteBtn')) {
+    document.getElementById('paletteBtn').addEventListener('click', () => { palInput.value = ''; vista = acciones; sel = 0; pintarPalette(); palette.showModal(); palInput.focus(); });
+    addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palette.open ? palette.close() : document.getElementById('paletteBtn').click(); } });
+    palette.addEventListener('click', e => { if (e.target === palette) palette.close(); });
+    palInput.addEventListener('input', () => { vista = acciones.filter(a => a[1].toLowerCase().includes(palInput.value.toLowerCase())); sel = 0; pintarPalette(); });
+    palInput.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown') { sel = (sel + 1) % vista.length; pintarPalette(); e.preventDefault(); }
+        if (e.key === 'ArrowUp') { sel = (sel - 1 + vista.length) % vista.length; pintarPalette(); e.preventDefault(); }
+        if (e.key === 'Enter' && vista[sel]) { palette.close(); vista[sel][2](); }
+    });
+}
 
-// ==========================================
-// NUEVO 2026 C: Terminal interactiva
-// ==========================================
+// Terminal
 const termIn = document.getElementById('termIn');
 const termOut = document.getElementById('termOut');
-const historial = []; let hIdx = 0;
-const comandos = {
-    help: () => 'Comandos: help, whoami, skills, games, music, schedule, theme, clear',
-    whoami: () => 'Alex | Ingeniero en Sistemas | Full Stack | Kali Linux',
-    skills: () => 'Full Stack 90% | Móvil (Kotlin) 80% | SysAdmin 85%',
-    games: () => 'Counter-Strike 2, Valorant, The Witcher 3, Elden Ring',
-    music: () => 'Synthwave (modo focus)',
-    schedule: () => '08:30-11:45 Clases | 12:00-20:30 Trabajo | 21:00-23:30 Proyectos',
-    theme: () => { themeBtn.click(); return 'Tema cambiado.'; },
-    clear: () => { termOut.innerHTML = ''; return null; }
-};
-function imprimir(txt, clase = '') {
-    const p = document.createElement('div');
-    if (clase) p.className = clase;
-    p.textContent = txt;
-    termOut.appendChild(p);
-    termOut.scrollTop = termOut.scrollHeight;
+if(termIn) {
+    const historial = []; let hIdx = 0;
+    const comandos = {
+        help: () => 'Comandos: help, whoami, skills, games, music, schedule, theme, clear',
+        whoami: () => 'Alex | Ingeniero en Sistemas | Full Stack | Kali Linux',
+        skills: () => 'Full Stack 90% | Móvil 80% | SysAdmin 85%',
+        games: () => 'Counter-Strike 2, Valorant, The Witcher 3, Elden Ring',
+        music: () => 'Synthwave (modo focus)',
+        schedule: () => '08:30 Clases | 12:00 Trabajo | 21:00 Proyectos',
+        theme: () => { themeBtn.click(); return 'Tema cambiado.'; },
+        clear: () => { termOut.innerHTML = ''; return null; }
+    };
+    function imprimir(txt, clase = '') {
+        const p = document.createElement('div');
+        if (clase) p.className = clase;
+        p.textContent = txt;
+        termOut.appendChild(p);
+        termOut.scrollTop = termOut.scrollHeight;
+    }
+    imprimir('Bienvenido. Escribe "help" para ver los comandos.', 'ok');
+    termIn.addEventListener('keydown', e => {
+        if (e.key === 'ArrowUp' && historial.length) { hIdx = Math.max(0, hIdx - 1); termIn.value = historial[hIdx]; e.preventDefault(); }
+        if (e.key === 'ArrowDown') { hIdx = Math.min(historial.length, hIdx + 1); termIn.value = historial[hIdx] || ''; e.preventDefault(); }
+        if (e.key !== 'Enter') return;
+        const cmd = termIn.value.trim().toLowerCase();
+        termIn.value = '';
+        if (!cmd) return;
+        historial.push(cmd); hIdx = historial.length;
+        imprimir('alex@kali:~$ ' + cmd, 'cmd');
+        if (cmd.startsWith('sudo')) return imprimir('Buen intento, pero aquí el root es Alex.', 'err');
+        const fn = comandos[cmd];
+        if (!fn) return imprimir(`${cmd}: comando no encontrado. Prueba "help".`, 'err');
+        const r = fn(); if (r) imprimir(r);
+    });
+    document.getElementById('term').addEventListener('click', () => termIn.focus());
 }
-imprimir('Bienvenido. Escribe "help" para ver los comandos.', 'ok');
-termIn.addEventListener('keydown', e => {
-    if (e.key === 'ArrowUp' && historial.length) { hIdx = Math.max(0, hIdx - 1); termIn.value = historial[hIdx]; e.preventDefault(); }
-    if (e.key === 'ArrowDown') { hIdx = Math.min(historial.length, hIdx + 1); termIn.value = historial[hIdx] || ''; e.preventDefault(); }
-    if (e.key !== 'Enter') return;
-    const cmd = termIn.value.trim().toLowerCase();
-    termIn.value = '';
-    if (!cmd) return;
-    historial.push(cmd); hIdx = historial.length;
-    imprimir('alex@kali:~$ ' + cmd, 'cmd');
-    if (cmd.startsWith('sudo')) return imprimir('Buen intento, pero aquí el root es Alex.', 'err');
-    const fn = comandos[cmd];
-    if (!fn) return imprimir(`${cmd}: comando no encontrado. Prueba "help".`, 'err');
-    const r = fn(); if (r) imprimir(r);
-});
-document.getElementById('term').addEventListener('click', () => termIn.focus());
+
 // ============================================
 // REGISTRO DEL SERVICE WORKER (PWA)
 // ============================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('✅ PWA lista, SW registrado'))
+            .then(() => console.log('✅ PWA lista, SW registrado'))
             .catch(err => console.log('❌ Error SW:', err));
     });
 }
