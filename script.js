@@ -278,7 +278,7 @@ if(termIn) {
     const historial = []; let hIdx = 0;
     const comandos = {
         help: () => 'Comandos: help, whoami, skills, games, music, schedule, theme, clear',
-        whoami: () => 'Alex | Ingeniero en Sistemas | Full Stack | Kali Linux',
+        whoami: () => 'Alex | Ingeniero en Sistemas | Full Stack ',
         skills: () => 'Full Stack 90% | Móvil 80% | SysAdmin 85%',
         games: () => 'Counter-Strike 2, Valorant, The Witcher 3, Elden Ring',
         music: () => 'Synthwave (modo focus)',
@@ -345,5 +345,39 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
             .then(() => console.log('✅ SW registrado'))
             .catch(err => console.log('❌ Error SW:', err));
+    });
+}
+// ==========================================
+// 12. BOTÓN DE RE-HIDRATACIÓN MANUAL
+// ==========================================
+const hydrateBtn = document.getElementById('hydrateBtn');
+
+if (hydrateBtn) {
+    hydrateBtn.addEventListener('click', async () => {
+        // Efecto visual de rotación
+        hydrateBtn.style.transform = 'rotate(360deg) scale(0.9)';
+
+        // 1. Borrar memoria local (tema, estados)
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // 2. Borrar la caché del Service Worker (Fuerza la recarga)
+        if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            for (const name of cacheNames) {
+                await caches.delete(name);
+            }
+        }
+
+        // 3. Desregistrar el Service Worker viejo
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+        }
+
+        // 4. Recargar la página (Ahora descargará todo de nuevo de GitHub)
+        window.location.reload();
     });
 }
