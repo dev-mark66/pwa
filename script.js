@@ -348,36 +348,42 @@ if ('serviceWorker' in navigator) {
     });
 }
 // ==========================================
-// 12. BOTÓN DE RE-HIDRATACIÓN MANUAL
+// 12. SIMULACIÓN DE HIDRATACIÓN Y MEMORY LEAKS (Guía del Profe)
 // ==========================================
-const hydrateBtn = document.getElementById('hydrateBtn');
+$(document).ready(function() {
 
-if (hydrateBtn) {
-    hydrateBtn.addEventListener('click', async () => {
-        // Efecto visual de rotación
-        hydrateBtn.style.transform = 'rotate(360deg) scale(0.9)';
+    function hidratarInterfaz() {
+        let $main = $('#appMain');
 
-        // 1. Borrar memoria local (tema, estados)
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // 2. Borrar la caché del Service Worker (Fuerza la recarga)
-        if ('caches' in window) {
-            const cacheNames = await caches.keys();
-            for (const name of cacheNames) {
-                await caches.delete(name);
-            }
+        // 1. EVITAR MEMORY LEAK: Si ya está hidratado, no volver a enganchar eventos
+        if ($main.attr('data-hidratado') === 'true') {
+            console.log('Ya está hidratado, previniendo Memory Leak.');
+            return;
         }
 
-        // 3. Desregistrar el Service Worker viejo
-        if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (const registration of registrations) {
-                await registration.unregister();
-            }
-        }
+        // 2. PRÁCTICA CORRECTA: .off() antes de .on() para limpiar memoria
+        // (Esto lo aplicamos a los botones del menú para que no se dupliquen)
+        $('.nav-link').off('click').on('click', function(e) {
+            e.preventDefault();
+            let target = $(this).data('target');
+            navigateTo(target);
+        });
 
-        // 4. Recargar la página (Ahora descargará todo de nuevo de GitHub)
-        window.location.reload();
+        // 3. Simular que los botones ahora son interactivos
+        $('#hydrateBtn').text('✅ Hidratado').css('background', '#10b981'); // Verde
+
+        // 4. Marcar como hidratado
+        $main.attr('data-hidratado', 'true');
+        console.log('💧 Interfaz hidratada con éxito.');
+    }
+
+    // SIMULACIÓN: La interfaz carga estática y a los 500ms se "hidrata"
+    setTimeout(hidratarInterfaz, 500);
+
+    // BOTÓN MANUAL PARA HIDRATAR (El que pediste)
+    $('#hydrateBtn').on('click', function() {
+        // Forzamos a que se vuelva a hidratar (para probar la limpieza)
+        $('#appMain').attr('data-hidratado', 'false');
+        hidratarInterfaz();
     });
-}
+});
