@@ -29,7 +29,8 @@ themeBtn.addEventListener('click', (e) => {
 const navMenu = document.getElementById('navMenu');
 const burgerBtn = document.getElementById('burgerBtn');
 
-function navigateTo(targetId) {
+// Función global para que jQuery también pueda usarla
+window.navigateTo = function(targetId) {
     document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
     const targetView = document.getElementById(targetId);
     if (targetView) {
@@ -47,7 +48,7 @@ function navigateTo(targetId) {
 document.querySelectorAll('[data-target]').forEach(el => {
     el.addEventListener('click', (e) => {
         e.preventDefault();
-        navigateTo(el.dataset.target);
+        window.navigateTo(el.dataset.target);
     });
 });
 
@@ -236,7 +237,7 @@ if(track) [...track.children].forEach(n => { const c = n.cloneNode(true); c.setA
 const palette = document.getElementById('palette');
 const palInput = document.getElementById('palInput');
 const palList = document.getElementById('palList');
-const irA = id => () => navigateTo(id);
+const irA = id => () => window.navigateTo(id);
 const acciones = [
     ['ph-house', 'Inicio', irA('inicio')], ['ph-game-controller', 'Pasatiempos', irA('pasatiempos')],
     ['ph-rocket-launch', 'Intereses', irA('intereses')], ['ph-clock-user', 'Horario', irA('horario')],
@@ -336,7 +337,6 @@ if(installBtn) {
 }
 
 if ('serviceWorker' in navigator) {
-    // Recargar si hay una nueva versión del Service Worker
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
     });
@@ -347,6 +347,7 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('❌ Error SW:', err));
     });
 }
+
 // ==========================================
 // 12. SIMULACIÓN DE HIDRATACIÓN Y MEMORY LEAKS (Guía del Profe)
 // ==========================================
@@ -355,35 +356,39 @@ $(document).ready(function() {
     function hidratarInterfaz() {
         let $main = $('#appMain');
 
-        // 1. EVITAR MEMORY LEAK: Si ya está hidratado, no volver a enganchar eventos
-        if ($main.attr('data-hidratado') === 'true') {
-            console.log('Ya está hidratado, previniendo Memory Leak.');
-            return;
-        }
-
-        // 2. PRÁCTICA CORRECTA: .off() antes de .on() para limpiar memoria
-        // (Esto lo aplicamos a los botones del menú para que no se dupliquen)
+        // 1. PRÁCTICA CORRECTA: Limpiar eventos viejos antes de asignar los nuevos
+        // (Evita Memory Leaks en el menú)
         $('.nav-link').off('click').on('click', function(e) {
             e.preventDefault();
             let target = $(this).data('target');
-            navigateTo(target);
+            window.navigateTo(target);
         });
 
-        // 3. Simular que los botones ahora son interactivos
-        $('#hydrateBtn').text('✅ Hidratado').css('background', '#10b981'); // Verde
+        // 2. Actualizar el botón al estado "Hidratado"
+        // Usamos .html() para mantener el ícono de check
+        $('#hydrateBtn').html('<i class="ph ph-check-circle"></i>').css('background', '#10b981');
 
-        // 4. Marcar como hidratado
+        // 3. Marcar el DOM como hidratado
         $main.attr('data-hidratado', 'true');
         console.log('💧 Interfaz hidratada con éxito.');
     }
 
-    // SIMULACIÓN: La interfaz carga estática y a los 500ms se "hidrata"
+    // SIMULACIÓN INICIAL: La interfaz carga estática y a los 500ms se "hidrata"
     setTimeout(hidratarInterfaz, 500);
 
-    // BOTÓN MANUAL PARA HIDRATAR (El que pediste)
+    // ==========================================
+    // BOTÓN MANUAL DE RE-HIDRATACIÓN
+    // ==========================================
     $('#hydrateBtn').on('click', function() {
-        // Forzamos a que se vuelva a hidratar (para probar la limpieza)
+        let $btn = $(this);
+
+        // 1. Efecto visual de carga (Naranja con spinner)
+        $btn.html('<i class="ph ph-spinner-gap" style="animation: spin 1s linear infinite;"></i>').css('background', '#f59e0b');
+
+        // 2. "Deshidratamos" para que el código vuelva a correr
         $('#appMain').attr('data-hidratado', 'false');
-        hidratarInterfaz();
+
+        // 3. Esperamos 800ms y mandamos a hidratar de nuevo (se pondrá verde)
+        setTimeout(hidratarInterfaz, 800);
     });
 });
