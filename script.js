@@ -353,11 +353,13 @@ if ('serviceWorker' in navigator) {
 // ==========================================
 $(document).ready(function() {
 
+    // Crear el elemento Toast dinámicamente
+    $('body').append('<div id="toast">✅ App Hidratada correctamente</div>');
+
     function hidratarInterfaz() {
         let $main = $('#appMain');
 
-        // 1. PRÁCTICA CORRECTA: Limpiar eventos viejos antes de asignar los nuevos
-        // (Evita Memory Leaks en el menú)
+        // 1. PRÁCTICA CORRECTA: .off() antes de .on() para limpiar memoria
         $('.nav-link').off('click').on('click', function(e) {
             e.preventDefault();
             let target = $(this).data('target');
@@ -365,11 +367,15 @@ $(document).ready(function() {
         });
 
         // 2. Actualizar el botón al estado "Hidratado"
-        // Usamos .html() para mantener el ícono de check
-        $('#hydrateBtn').html('<i class="ph ph-check-circle"></i>').css('background', '#10b981');
+        $('#hydrateBtn').html('<i class="ph ph-check-circle"></i> Hidratado').css('background', '#10b981');
 
         // 3. Marcar el DOM como hidratado
         $main.attr('data-hidratado', 'true');
+
+        // 4. Mostrar notificación visual
+        $('#toast').addClass('show');
+        setTimeout(() => $('#toast').removeClass('show'), 3000);
+
         console.log('💧 Interfaz hidratada con éxito.');
     }
 
@@ -382,13 +388,16 @@ $(document).ready(function() {
     $('#hydrateBtn').on('click', function() {
         let $btn = $(this);
 
-        // 1. Efecto visual de carga (Naranja con spinner)
-        $btn.html('<i class="ph ph-spinner-gap" style="animation: spin 1s linear infinite;"></i>').css('background', '#f59e0b');
+        // 1. Efecto visual: Naranja con texto "Hidratando..."
+        $btn.html('<i class="ph ph-spinner-gap" style="animation: spin 1s linear infinite;"></i> Hidratando...').css('background', '#f59e0b');
 
-        // 2. "Deshidratamos" para que el código vuelva a correr
+        // 2. "Deshidratamos" la app
         $('#appMain').attr('data-hidratado', 'false');
 
-        // 3. Esperamos 800ms y mandamos a hidratar de nuevo (se pondrá verde)
-        setTimeout(hidratarInterfaz, 800);
+        // 3. Volvemos al Inicio para que veas el cambio en la pantalla
+        window.navigateTo('inicio');
+
+        // 4. Esperamos 1 segundo (para que se vea la animación) y re-hidratamos
+        setTimeout(hidratarInterfaz, 1000);
     });
 });

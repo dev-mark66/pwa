@@ -238,6 +238,34 @@ footer p { margin: 0; }
 #palList li i { color: var(--primary); font-size: 1.2rem; }
 #palList li.sel, #palList li:hover { background: color-mix(in srgb, var(--primary) 16%, transparent); }
 
+/* Animación del spinner */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Notificación Toast */
+#toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+}
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
 /* ==========================================
    RESPONSIVE (CELULARES Y TABLETS)
    ========================================== */
@@ -271,8 +299,4 @@ footer p { margin: 0; }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-}
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
 }
