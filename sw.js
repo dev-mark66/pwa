@@ -1,12 +1,4 @@
-// ============================================
-// SERVICE WORKER - El "corazón" offline de tu PWA
-// ============================================
-// Guarda los archivos de tu app en caché para que funcione
-// sin internet y sea instalable.
-// ============================================
-
-const CACHE_NAME = 'macr-pwa-v1';
-
+const CACHE_NAME = 'portafolio-v5'; // Versión 5 para forzar actualización
 const ARCHIVOS = [
   './',
   './index.html',
@@ -16,35 +8,33 @@ const ARCHIVOS = [
   './img/logo.png'
 ];
 
-// INSTALACIÓN: guarda todos los archivos en caché
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker: instalando...');
+  self.skipWaiting(); // Fuerza la instalación inmediata
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('📦 Guardando archivos');
-        return cache.addAll(ARCHIVOS);
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ARCHIVOS))
   );
 });
 
-// ACTIVACIÓN: limpia cachés viejos
 self.addEventListener('activate', (event) => {
-  console.log('✅ Service Worker: activado');
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    )).then(() => self.clients.claim()) // Toma el control de inmediato
   );
 });
 
-// FETCH: primero busca en caché, si no, va a internet
+// ESTRATEGIA: Primero intenta por red (para no quedarse offline), si falla usa caché
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    fetch(event.request)
+      .then(response => {
+        // Si la respuesta es buena, la guardamos en caché
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request)) // Si falla la red, usa caché
   );
 });

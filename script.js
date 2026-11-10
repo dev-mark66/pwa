@@ -24,7 +24,7 @@ themeBtn.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 2. ENRUTADOR SPA (Muestra una sección a la vez)
+// 2. ENRUTADOR SPA
 // ==========================================
 const navMenu = document.getElementById('navMenu');
 const burgerBtn = document.getElementById('burgerBtn');
@@ -52,7 +52,7 @@ document.querySelectorAll('[data-target]').forEach(el => {
 });
 
 // ==========================================
-// 3. MENÚ HAMBURGUESA (Móvil)
+// 3. MENÚ HAMBURGUESA
 // ==========================================
 burgerBtn.addEventListener('click', () => {
     const open = navMenu.classList.toggle('show');
@@ -311,13 +311,39 @@ if(termIn) {
     document.getElementById('term').addEventListener('click', () => termIn.focus());
 }
 
-// ============================================
-// 11. REGISTRO DEL SERVICE WORKER (PWA)
-// ============================================
+// ==========================================
+// 11. PWA: INSTALACIÓN Y ACTUALIZACIÓN
+// ==========================================
+let deferredPrompt;
+const installBanner = document.getElementById('installBanner');
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if(installBanner) installBanner.style.display = 'flex';
+});
+
+if(installBtn) {
+    installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('Instalación:', outcome);
+        deferredPrompt = null;
+        if(installBanner) installBanner.style.display = 'none';
+    });
+}
+
 if ('serviceWorker' in navigator) {
+    // Recargar si hay una nueva versión del Service Worker
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+    });
+
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('✅ PWA lista, SW registrado'))
+            .then(() => console.log('✅ SW registrado'))
             .catch(err => console.log('❌ Error SW:', err));
     });
 }

@@ -242,7 +242,6 @@ footer p { margin: 0; }
    RESPONSIVE (CELULARES Y TABLETS)
    ========================================== */
 @media (max-width: 991px) {
-    /* Menú hamburguesa visible */
     .navbar-collapse {
         display: none;
         background: var(--glass-bg);
@@ -256,7 +255,6 @@ footer p { margin: 0; }
     .navbar-nav { gap: 0.5rem !important; text-align: center; }
     .nav-link { padding: 0.5rem 1rem; }
 
-    /* Ajustes del Hero en celular */
     .hero-content { text-align: center; margin-top: 20px; }
     .carousel-wrapper { height: 300px; margin-top: 2rem; }
     .card-3d { width: 80%; }
