@@ -1,5 +1,5 @@
 // ==========================================
-// 1. MODO OSCURO (Ejemplo 1) con View Transitions API
+// 1. MODO OSCURO
 // ==========================================
 const themeBtn = document.getElementById('themeBtn');
 const bodyElement = document.body;
@@ -24,34 +24,26 @@ themeBtn.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 2. ENRUTADOR SPA (Muestra solo una sección a la vez)
+// 2. ENRUTADOR SPA (Muestra una sección a la vez)
 // ==========================================
 const navMenu = document.getElementById('navMenu');
 const burgerBtn = document.getElementById('burgerBtn');
 
 function navigateTo(targetId) {
-    // 1. Ocultar todas las vistas
     document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
-
-    // 2. Mostrar la vista seleccionada
     const targetView = document.getElementById(targetId);
     if (targetView) {
         targetView.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // Subir al inicio de la página
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-    // 3. Actualizar clases activas en el menú
     document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
         link.classList.toggle('active', link.dataset.target === targetId);
     });
-
-    // 4. Cerrar menú móvil si está abierto
     navMenu.classList.remove('show');
     burgerBtn.setAttribute('aria-expanded', false);
     burgerBtn.querySelector('i').className = 'ph ph-list';
 }
 
-// Escuchar clics en enlaces del menú y botones con data-target
 document.querySelectorAll('[data-target]').forEach(el => {
     el.addEventListener('click', (e) => {
         e.preventDefault();
@@ -69,7 +61,7 @@ burgerBtn.addEventListener('click', () => {
 });
 
 // ==========================================
-// 4. FILTRO DE JUEGOS (Ejemplo 2)
+// 4. FILTRO DE JUEGOS
 // ==========================================
 const tarjetas = document.querySelectorAll('.juego-card');
 const botonesFiltro = document.querySelectorAll('#juegos .btn');
@@ -95,7 +87,7 @@ function filtrarJuegos(categoria, btn) {
 botonesFiltro.forEach(btn => btn.addEventListener('click', () => filtrarJuegos(btn.dataset.filtro, btn)));
 
 // ==========================================
-// 5. VALIDACIÓN DE FORMULARIO (Ejemplo 4)
+// 5. VALIDACIÓN DE FORMULARIO
 // ==========================================
 const form = document.getElementById('contactForm');
 const alertBox = document.getElementById('alertBox');
@@ -135,7 +127,7 @@ if(form) {
 }
 
 // ==========================================
-// EXTRAS: CARRUSEL 3D, TYPEWRITER, REVEAL, etc.
+// 6. CARRUSEL 3D
 // ==========================================
 const cards = document.querySelectorAll('.card-3d');
 const dotsBox = document.getElementById('dots');
@@ -176,7 +168,9 @@ if (cards.length > 0 && dotsBox) {
     updateCarousel(); startAuto();
 }
 
-// Typewriter
+// ==========================================
+// 7. TYPEWRITER
+// ==========================================
 const textElement = document.getElementById('typewriter');
 const textArray = ["Ingeniero en Sistemas.", "Desarrollador Full Stack.", "Creador de APKs.", "Entusiasta de Kali Linux."];
 let textIndex = 0, charIndex = 0, isDeleting = false;
@@ -193,7 +187,9 @@ function type() {
 }
 if(textElement) document.addEventListener('DOMContentLoaded', () => setTimeout(type, 800));
 
-// Reveal y contadores
+// ==========================================
+// 8. REVEAL / CONTADORES / TILT / SCROLL
+// ==========================================
 function animateSkill(box) {
     box.querySelectorAll('.progress').forEach(p => p.style.width = p.dataset.w + '%');
     box.querySelectorAll('.count').forEach(c => {
@@ -203,7 +199,6 @@ function animateSkill(box) {
     });
 }
 
-// Tilt 3D, Scroll y Buscador (Mantenidos de tu código original)
 document.querySelectorAll('.tilt').forEach(card => {
     card.addEventListener('pointermove', e => {
         const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
@@ -235,11 +230,13 @@ if(document.getElementById('year')) document.getElementById('year').textContent 
 const track = document.getElementById('marquee');
 if(track) [...track.children].forEach(n => { const c = n.cloneNode(true); c.setAttribute('aria-hidden', 'true'); track.appendChild(c); });
 
-// Buscador
+// ==========================================
+// 9. BUSCADOR (Ctrl+K)
+// ==========================================
 const palette = document.getElementById('palette');
 const palInput = document.getElementById('palInput');
 const palList = document.getElementById('palList');
-const irA = id => () => navigateTo(id); // Ahora usa navigateTo
+const irA = id => () => navigateTo(id);
 const acciones = [
     ['ph-house', 'Inicio', irA('inicio')], ['ph-game-controller', 'Pasatiempos', irA('pasatiempos')],
     ['ph-rocket-launch', 'Intereses', irA('intereses')], ['ph-clock-user', 'Horario', irA('horario')],
@@ -272,7 +269,9 @@ if(document.getElementById('paletteBtn')) {
     });
 }
 
-// Terminal
+// ==========================================
+// 10. TERMINAL INTERACTIVA
+// ==========================================
 const termIn = document.getElementById('termIn');
 const termOut = document.getElementById('termOut');
 if(termIn) {
@@ -313,7 +312,7 @@ if(termIn) {
 }
 
 // ============================================
-// REGISTRO DEL SERVICE WORKER (PWA)
+// 11. REGISTRO DEL SERVICE WORKER (PWA)
 // ============================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
