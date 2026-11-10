@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portafolio de Alex: Ingeniero en Sistemas, Full Stack, apps Android y Kali Linux.">
+    <title>Alex | Ingeniero en Sistemas & Full Stack</title>
+
+    <!-- ✅ CORREGIDO: PWA (theme-color + manifest + apple-touch-icon) -->
+    <meta name="theme-color" content="#6d28d9">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="scroll-progress"></div>
+    <div class="spotlight" aria-hidden="true"></div>
+    <div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+
+    <!-- 1. NAVBAR (Bootstrap) + Ejemplo 3: hamburguesa con classList.toggle('show') -->
+    <nav class="navbar navbar-expand-lg fixed-top glass-header" id="navbar">
+        <div class="container">
+            <a class="navbar-brand logo" href="#inicio">Mark<span>.12</span></a>
+            <button id="burgerBtn" class="burger-btn d-lg-none" aria-label="Abrir menú" aria-expanded="false"><i class="ph ph-list"></i></button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#pasatiempos">Pasatiempos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#intereses">Intereses</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#horario">Horario</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#musica">Música</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#juegos">Juegos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#frase">Frase</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#terminal">Terminal</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+                    <li class="nav-item"><button id="paletteBtn" class="theme-btn" title="Buscar (Ctrl+K)" aria-label="Abrir buscador"><i class="ph ph-command"></i></button></li>
+                    <!-- Ejemplo 1: Dark mode -->
+                    <li class="nav-item"><button id="themeBtn" class="theme-btn" title="Cambiar tema" aria-label="Cambiar tema"><i class="ph ph-moon"></i></button></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+    <!-- 2. HERO + CARRUSEL (3 fotos) -->
+    <section id="inicio" class="hero">
+        <div class="hero-content">
+            <p class="kbd"><i class="ph ph-terminal-window"></i> alex@kali:~$ whoami</p>
+            <h1>Hola, soy <span class="highlight">Alex</span>.</h1>
+            <h2 class="typewriter" id="typewriter" aria-live="off"></h2>
+            <p class="lead-text">Construyendo soluciones desde el kernel hasta la interfaz de usuario.</p>
+            <a href="#pasatiempos" class="btn-primary">Conóceme <i class="ph ph-arrow-down"></i></a>
+        </div>
+        <div class="carousel-wrapper">
+            <div class="carousel-3d" id="carousel3d">
+                <div class="card-3d active"><img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop" alt="Código en pantalla"><div class="card-info"><h3>Desarrollo Web</h3><p>Frontend & Backend</p></div></div>
+                <div class="card-3d next"><img src="https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?q=80&w=800&auto=format&fit=crop" alt="Apps móviles"><div class="card-info"><h3>Apps Android</h3><p>Compilación de APKs</p></div></div>
+                <div class="card-3d prev"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop" alt="Terminal estilo Matrix"><div class="card-info"><h3>SysAdmin & Hacking Ético</h3><p>Entornos Kali Linux</p></div></div>
+            </div>
+            <div class="carousel-controls">
+                <button id="prevBtn" aria-label="Anterior"><i class="ph ph-caret-left"></i></button>
+                <div class="dots" id="dots"></div>
+                <button id="nextBtn" aria-label="Siguiente"><i class="ph ph-caret-right"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Marquesina de tecnologías -->
+    <div class="marquee" aria-label="Tecnologías que uso"><div class="marquee-track" id="marquee">
+        <span><i class="ph ph-file-js"></i> JavaScript</span><span><i class="ph ph-hexagon"></i> Node.js</span><span><i class="ph ph-atom"></i> React</span><span><i class="ph ph-android-logo"></i> Kotlin</span><span><i class="ph ph-terminal-window"></i> Bash</span><span><i class="ph ph-linux-logo"></i> Kali Linux</span><span><i class="ph ph-code"></i> Zed</span><span><i class="ph ph-github-logo"></i> GitHub</span>
+    </div></div>
+
+    <!-- 3. PASATIEMPOS -->
+    <section id="pasatiempos" class="main-content">
+        <h2 class="section-title reveal"><i class="ph ph-game-controller"></i> Pasatiempos</h2>
+        <p class="section-sub reveal">Lo que hago para desconectarme (sí, también sin compilar nada).</p>
+        <div class="grid-container">
+            <article class="card glass-panel tilt reveal"><i class="ph ph-crosshair"></i><h3>Gaming competitivo</h3><p>Partidas tácticas de Valorant y CS2 para entrenar reflejos y trabajo en equipo.</p></article>
+            <article class="card glass-panel tilt reveal"><i class="ph ph-headphones"></i><h3>Synthwave</h3><p>Música retro-futurista de fondo para cualquier sesión larga.</p></article>
+            <article class="card glass-panel tilt reveal"><i class="ph ph-sword"></i><h3>Mundos abiertos</h3><p>RPG de historia profunda como The Witcher 3 y Elden Ring.</p></article>
+        </div>
+    </section>
+
+    <!-- 4. INTERESES -->
+    <section id="intereses" class="main-content alt">
+        <h2 class="section-title reveal"><i class="ph ph-rocket-launch"></i> Intereses</h2>
+        <p class="section-sub reveal">Áreas de especialización en las que invierto mi tiempo productivo.</p>
+        <div class="grid-container">
+            <article class="card glass-panel tilt reveal"><i class="ph ph-browser"></i><h3>Plataformas Web</h3><p>SPAs y dashboards con tecnologías frontend modernas.</p></article>
+            <article class="card glass-panel tilt reveal"><i class="ph ph-device-mobile"></i><h3>Aplicaciones APK</h3><p>Apps nativas para Android, optimizando recursos.</p></article>
+            <article class="card glass-panel tilt reveal"><i class="ph ph-shield-check"></i><h3>Ciberseguridad</h3><p>Auditorías básicas y despliegues seguros en entornos Linux.</p></article>
+        </div>
+    </section>
+
+    <!-- 5. HORARIO -->
+    <section id="horario" class="main-content">
+        <h2 class="section-title reveal"><i class="ph ph-clock-user"></i> Horario</h2>
+        <p class="section-sub reveal">Mis infaltables diarios. La fila resaltada es lo que toca ahora mismo.</p>
+        <div class="glass-panel table-container sheet reveal">
+            <div class="table-responsive">
+            <table>
+                <thead><tr><th class="rn"></th><th>A · Hora</th><th>B · Actividad</th></tr></thead>
+                <tbody id="schedule">
+                    <tr data-start="510" data-end="705"><td class="rn">1</td><td>08:30 - 11:45</td><td>Clases Universitarias</td></tr>
+                    <tr data-start="720" data-end="1230"><td class="rn">2</td><td>12:00 - 20:30</td><td>Trabajo / Desarrollo Full Stack</td></tr>
+                    <tr data-start="1260" data-end="1410"><td class="rn">3</td><td>21:00 - 23:30</td><td>Llegada a casa, tareas y proyectos personales</td></tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. MÚSICA (favoritos, tabla) -->
+    <section id="musica" class="main-content alt">
+        <h2 class="section-title reveal"><i class="ph ph-music-notes"></i> Música y Favoritos</h2>
+        <p class="section-sub reveal">Mi setup y mis favoritos del momento.</p>
+        <div class="glass-panel table-container reveal">
+            <table>
+                <thead><tr><th>Categoría</th><th>Favorito</th></tr></thead>
+                <tbody>
+                    <tr><td><i class="ph ph-linux-logo"></i> Sistema Operativo</td><td>Kali Linux</td></tr>
+                    <tr><td><i class="ph ph-code"></i> Editor de Código</td><td>Zed</td></tr>
+                    <tr><td><i class="ph ph-crosshair"></i> Juego (FPS)</td><td>Valorant / CS2</td></tr>
+                    <tr><td><i class="ph ph-waveform"></i> Música (Focus)</td><td>Synthwave</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 7. JUEGOS (Ejemplo 2: filtro con data-categoria) -->
+    <section id="juegos" class="main-content">
+        <h2 class="section-title reveal"><i class="ph ph-trophy"></i> Catálogo de Juegos Favoritos</h2>
+        <div class="filter-buttons reveal">
+            <button class="btn active" data-filtro="todos">Ver Todos</button>
+            <button class="btn" data-filtro="shooter">Ver Shooters</button>
+            <button class="btn" data-filtro="rpg">Ver RPG</button>
+        </div>
+        <div class="grid-container" id="juegosGrid">
+            <article class="card glass-panel tilt juego-card reveal" data-categoria="shooter"><i class="ph ph-crosshair"></i><h3>Counter-Strike 2</h3><p>Shooter táctico 5v5.</p></article>
+            <article class="card glass-panel tilt juego-card reveal" data-categoria="rpg"><i class="ph ph-sword"></i><h3>The Witcher 3</h3><p>RPG de mundo abierto y narrativa profunda.</p></article>
+            <article class="card glass-panel tilt juego-card reveal" data-categoria="shooter"><i class="ph ph-crosshair"></i><h3>Valorant</h3><p>Shooter táctico con habilidades.</p></article>
+            <article class="card glass-panel tilt juego-card reveal" data-categoria="rpg"><i class="ph ph-sword"></i><h3>Elden Ring</h3><p>RPG de acción desafiante.</p></article>
+        </div>
+    </section>
+
+    <!-- 8. FRASE + CARACTERÍSTICA GRÁFICO -->
+    <section id="frase" class="main-content alt">
+        <div class="glass-panel quote reveal">
+            <i class="ph ph-quotes"></i>
+            <blockquote>Del kernel a la interfaz: si funciona y es seguro, entonces está bien hecho.</blockquote>
+            <cite>Alex</cite>
+        </div>
+        <div class="glass-panel skill-container reveal">
+            <h3 class="mb-4"><i class="ph ph-cpu"></i> Stack Tecnológico</h3>
+            <div class="skill"><div class="skill-header"><span>Desarrollo Full Stack (JS, Node, React)</span><span class="count" data-to="90">0</span></div><div class="progress-bar"><div class="progress" data-w="90"></div></div></div>
+            <div class="skill"><div class="skill-header"><span>Desarrollo Móvil (Kotlin / APKs)</span><span class="count" data-to="80">0</span></div><div class="progress-bar"><div class="progress" data-w="80"></div></div></div>
+            <div class="skill"><div class="skill-header"><span>SysAdmin (Kali Linux / Bash)</span><span class="count" data-to="85">0</span></div><div class="progress-bar"><div class="progress" data-w="85"></div></div></div>
+        </div>
+    </section>
+
+    <!-- TERMINAL INTERACTIVA -->
+    <section id="terminal" class="main-content">
+        <h2 class="section-title reveal"><i class="ph ph-terminal-window"></i> Terminal Interactiva</h2>
+        <p class="section-sub reveal">Escribe <code>help</code> y explora mi portafolio como en Kali.</p>
+        <div class="terminal reveal" id="term">
+            <div class="term-bar"><span></span><span></span><span></span><b>alex@kali: ~</b></div>
+            <div class="term-body" id="termOut" aria-live="polite"></div>
+            <label class="term-line"><span class="ps1">alex@kali:~$</span><input id="termIn" autocomplete="off" spellcheck="false" aria-label="Línea de comandos"></label>
+        </div>
+    </section>
+
+    <!-- PREGUNTAS FRECUENTES -->
+    <section id="faq" class="main-content alt">
+        <h2 class="section-title reveal"><i class="ph ph-question"></i> Preguntas Frecuentes</h2>
+        <div class="faq reveal">
+            <details name="faq" open><summary>¿Qué stack uso para desarrollo web?</summary><p>JavaScript, Node y React para soluciones Full Stack, con SPAs y dashboards modernos.</p></details>
+            <details name="faq"><summary>¿Con qué trabajo a diario?</summary><p>Kali Linux como sistema operativo y Zed como editor de código, con música Synthwave para concentrarme.</p></details>
+            <details name="faq"><summary>¿Haces aplicaciones móviles?</summary><p>Sí, desarrollo apps nativas para Android con Kotlin y compilo APKs optimizando recursos.</p></details>
+            <details name="faq"><summary>¿Cómo puedo contactarte?</summary><p>Usa el formulario de la sección <a href="#contacto">Contacto</a> o escríbeme desde mis redes en el pie de página.</p></details>
+        </div>
+    </section>
+
+    <!-- CONTACTO (Ejemplo 4: validación) -->
+    <section id="contacto" class="contact-section">
+        <div class="glass-panel form-container reveal">
+            <h2>Hablemos de Código</h2>
+            <p class="form-subtitle">¿Tienes un proyecto o propuesta? Escríbeme.</p>
+            <form id="contactForm" novalidate>
+                <div class="input-group"><i class="ph ph-user"></i><input type="text" id="nombre" placeholder="Tu Nombre (solo letras)" required><small class="error-msg" id="errorNombre"></small></div>
+                <div class="input-group"><i class="ph ph-envelope-simple"></i><input type="email" id="email" placeholder="Tu Correo Electrónico" required><small class="error-msg" id="errorEmail"></small></div>
+                <div class="input-group"><i class="ph ph-phone"></i><input type="tel" id="telefono" placeholder="Teléfono (solo números)" required><small class="error-msg" id="errorTelefono"></small></div>
+                <div class="input-group"><i class="ph ph-chat-text"></i><textarea id="mensaje" rows="3" placeholder="Tu mensaje..." required></textarea><small class="error-msg" id="errorMensaje"></small></div>
+                <button type="submit">Enviar Propuesta <i class="ph ph-paper-plane-right"></i></button>
+            </form>
+            <div id="alertBox" role="status"></div>
+        </div>
+    </section>
+    </main>
+
+    <footer>
+        <p>&copy; <span id="year">2026</span> <strong>3R.S.</strong> - Alex | Ing. Sistemas.</p>
+        <div class="socials">
+            <a href="#" aria-label="GitHub"><i class="ph ph-github-logo"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+            <a href="#" aria-label="Correo"><i class="ph ph-envelope-simple"></i></a>
+        </div>
+    </footer>
+
+    <dialog id="palette" aria-label="Buscador rápido">
+        <input id="palInput" placeholder="Ir a... (Ctrl+K)" autocomplete="off" aria-label="Buscar acción">
+        <ul id="palList"></ul>
+    </dialog>
+
+    <script src="script.js" defer></script>
+
+    <!-- ✅ CORREGIDO: registro del SW con ruta relativa (antes tenía '/sw.js') -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('✅ PWA lista, SW registrado'))
+            .catch(err => console.log('❌ Error SW:', err));
+        });
+      }
+    </script>
+</body>
+</html>
