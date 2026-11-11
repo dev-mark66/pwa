@@ -419,3 +419,80 @@ $(document).ready(function() {
     // Ejecutar al iniciar la app
     actualizarEstadoRed();
 });
+// ==========================================
+// 5. VALIDACIÓN DE FORMULARIO (CON SOPORTE OFFLINE-FIRST)
+// ==========================================
+const form = document.getElementById('contactForm');
+const alertBox = document.getElementById('alertBox');
+const regexNombre = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const regexTelefono = /^\+?[0-9]{7,15}$/;
+
+const campos = [
+    { el: document.getElementById('nombre'), err: 'errorNombre', ok: v => regexNombre.test(v) && v.length >= 3, msg: 'Solo letras (mín. 3).' },
+    { el: document.getElementById('email'), err: 'errorEmail', ok: v => regexEmail.test(v), msg: 'Correo inválido.' },
+    { el: document.getElementById('telefono'), err: 'errorTelefono', ok: v => regexTelefono.test(v), msg: 'Solo números (7-15).' },
+    { el: document.getElementById('mensaje'), err: 'errorMensaje', ok: v => v.length >= 10, msg: 'Mínimo 10 letras.' }
+];
+
+function validateField({ el, err, ok, msg }) {
+    const valido = ok(el.value.trim());
+    el.classList.toggle('input-success', valido);
+    el.classList.toggle('input-error', !valido);
+    document.getElementById(err).textContent = valido ? '' : msg;
+    return valido;
+}
+campos.forEach(c => c.el.addEventListener('input', () => validateField(c)));
+
+if(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const resultados = campos.map(validateField);
+
+        if (resultados.every(Boolean)) {
+            const nombre = campos[0].el.value.trim().replace(/[<>&]/g, '');
+
+            // --- LÓGICA OFFLINE-FIRST (Pilar 2 y 3 del PDF) ---
+            if (navigator.onLine) {
+                // Si hay internet, se "envía" (Simulado)
+                alertBox.innerHTML = `<p class="msg-exito"><i class="ph ph-check-circle"></i> ¡Gracias ${nombre}, tu propuesta ha sido enviada al servidor!</p>`;
+            } else {
+                // Si NO hay internet, guardamos en la cola local (LocalStorage)
+                let colaPendiente = JSON.parse(localStorage.getItem('colaMensajes')) || [];
+                colaPendiente.push({
+                    nombre: nombre,
+                    email: campos[1].el.value.trim(),
+                    telefono: campos[2].el.value.trim(),
+                    mensaje: campos[3].el.value.trim()
+                });
+                localStorage.setItem('colaMensajes', JSON.stringify(colaPendiente));
+
+                // UI Resiliente: Avisamos que se guardó localmente
+                alertBox.innerHTML = `<p class="msg-offline" style="color:#d97706; background:#fef3c7; padding:1rem; border-radius:12px;"><i class="ph ph-warning-circle"></i> Guardado localmente. Pendiente de envío al recuperar conexión.</p>`;
+            }
+
+            form.reset();
+            campos.forEach(c => c.el.classList.remove('input-success'));
+        } else {
+            alertBox.innerHTML = `<p class="msg-error-box"><i class="ph ph-warning"></i> Revisa los campos marcados en rojo.</p>`;
+        }
+    });
+}
+
+// Sincronización automática: Si vuelve el internet, enviamos la cola
+window.addEventListener('online', () => {
+    let colaPendiente = JSON.parse(localStorage.getItem('colaMensajes')) || [];
+    if (colaPendiente.length > 0) {
+        console.log(`Sincronizando ${colaPendiente.length} mensajes pendientes...`);
+        // Aquí iría tu fetch() real a un servidor. Lo simulamos:
+        localStorage.removeItem('colaMensajes');
+
+        // Mostrar notificación de que se sincronizó
+        if(alertBox) {
+            alertBox.innerHTML = `<p class="msg-exito"><i class="ph ph-cloud-check"></i> ¡Conexión restablecida! Los mensajes pendientes han sido enviados.</p>`;
+        }
+        // Mostrar el Toast verde
+        $('#toast').text('☁️ Mensajes sincronizados').addClass('show');
+        setTimeout(() => $('#toast').removeClass('show'), 3000);
+    }
+});
