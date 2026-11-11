@@ -9,7 +9,287 @@
     <!-- PWA -->
     <meta name="theme-color" content="#6d28d9">
     <link rel="manifest" href="./manifest.json">
-    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="icon" type="image/png" href="img/logo.png"><!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Analizador de Código PWA / DOM</title>
+      <style>
+        :root{
+          --bg:#0f172a; --panel:#1e293b; --borde:#334155;
+          --acento:#f97316; --texto:#fff; --suave:#cbd5e1;
+          --ok:#22c55e; --mal:#ef4444; --aviso:#eab308;
+        }
+        *{box-sizing:border-box;}
+        body{
+          font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+          background:var(--bg); color:var(--texto);
+          padding:15px; margin:0; line-height:1.45;
+        }
+        .box{background:var(--panel); padding:15px; border-radius:8px; margin-bottom:15px;}
+        h2{margin:0 0 8px; color:var(--acento); font-size:20px;}
+        h3{margin:0 0 10px; font-size:17px;}
+        h4{color:var(--acento); margin:16px 0 8px; font-size:15px;}
+        .hint{font-size:12px; color:var(--suave); margin:0 0 12px;}
+        textarea{
+          width:100%; height:160px; background:var(--bg); color:#fde047;
+          border:1px solid var(--borde); border-radius:6px; padding:10px;
+          font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+          font-size:13px; resize:vertical;
+        }
+        textarea:focus{outline:2px solid var(--acento); outline-offset:1px;}
+        .btn{
+          background:var(--acento); color:#fff; border:none; padding:10px 16px;
+          border-radius:5px; cursor:pointer; font-weight:bold; font-size:14px; margin-top:10px;
+        }
+        .btn:hover{filter:brightness(1.1);}
+        .btn:active{transform:translateY(1px);}
+        .btn-sec{background:#475569;}
+        .result{display:none;}
+        .badge{display:inline-block; padding:2px 7px; border-radius:3px; font-size:11px; font-weight:bold; margin-right:6px;}
+        .badge-danger{background:var(--mal); color:#fff;}
+        .badge-success{background:var(--ok); color:#fff;}
+        .badge-warning{background:var(--aviso); color:#111;}
+        ul.reporte{padding-left:20px; margin:10px 0; font-size:13px;}
+        ul.reporte li{margin-bottom:6px;}
+        .error-entrada{color:var(--mal); font-size:13px; margin-top:10px; display:none;}
+        #msgCopiado{font-size:12px; color:var(--ok); margin-left:8px;}
+      </style>
+    </head>
+    <body>
+        <!-- INDICADOR DE ESTADO DE RED -->
+    <div id="estadoRed">🟢 En Línea</div>
+      <div class="box">
+        <h2>🔍 Diagnóstico de Código PWA &amp; Bloqueos DOM</h2>
+        <p class="hint">Pega tu código HTML/CSS abajo para detectar clases bloqueadas por Brave/Opera y problemas de viewport.</p>
+        <textarea id="codigoInput" placeholder="Pega aquí tu HTML/CSS..." spellcheck="false"></textarea>
+        <button class="btn" id="btnAnalizar" type="button">Analizar y Optimizar Código</button>
+        <p class="error-entrada" id="errorEntrada">⚠️ Pega algún código antes de analizar.</p>
+      </div>
+
+      <div id="panelResultado" class="box result">
+        <h3>Informe de Diagnóstico y Viabilidad</h3>
+        <div id="detallesReporte"></div>
+
+        <h4>Código Sugerido / Optimizado</h4>
+        <textarea id="codigoSugerido" readonly spellcheck="false"></textarea>
+        <button class="btn btn-sec" id="btnCopiar" type="button">📋 Copiar código</button>
+        <span id="msgCopiado"></span>
+      </div>
+
+    <script>
+    (function () {
+      'use strict';
+
+      /* ===================== REGLAS DE ANÁLISIS ===================== */
+
+      // Clase "bloqueable": la palabra sospechosa debe estar delimitada por
+      // guion, guion bajo o los extremos del nombre (así "gradient" o
+      // "shadow" NO se marcan, pero "ad-banner", "social-ads" o "tracker" sí).
+      // IMPORTANTE: sin bandera /g  ->  .test() no guarda estado (lastIndex).
+      var RE_CLASE_BLOQUEADA = /(^|[-_])(ad|ads|adv|advert|advertisement|advertising|banner|promo|promocion|sponsor|sponsored|analytics|tracker|tracking|pixel|popup|popunder|adsbygoogle)([-_]|$)/i;
+
+      // Cualquier propiedad *height cuyo valor contenga 100vh
+      var RE_ALTURA_VH = /([a-z-]*height)\s*:\s*([^;{}]*?100vh[^;{}]*)/gi;
+
+      // Solo el atributo class="..." / class='...'  (no toca ids, scripts ni texto)
+      var RE_ATRIB_CLASS = /class\s*=\s*(["'])([\s\S]*?)\1/gi;
+
+      var RE_VIEWPORT       = /<meta[^>]+name\s*=\s*["']viewport["'][^>]*>/i;
+      var RE_ZOOM_BLOQUEADO = /user-scalable\s*=\s*["']?\s*no|maximum-scale\s*=\s*["']?\s*1(?:\.0+)?/i;
+      var RE_MANIFEST       = /<link[^>]+rel\s*=\s*["']manifest["'][^>]*>/i;
+      var RE_DOC_HTML       = /<html[\s>]|<head[\s>]|<!doctype/i;
+
+      /* ===================== HELPERS DE RENDER ===================== */
+
+      function crearBadge(texto, clase) {
+        var s = document.createElement('span');
+        s.className = 'badge ' + clase;
+        s.textContent = texto;
+        return s;
+      }
+
+      function crearItem(texto, etiqueta, clase) {
+        var li = document.createElement('li');
+        li.appendChild(crearBadge(etiqueta, clase));
+        li.appendChild(document.createTextNode(texto));
+        return li;
+      }
+
+      /* ===================== ANÁLISIS ===================== */
+
+      function analizar(src) {
+        var graves = [];
+        var avisos = [];
+        var limpio = src;
+
+        /* --- 1) Clases bloqueables por Brave / Opera / uBlock --- */
+        var clasesDetectadas = [];
+        limpio = limpio.replace(RE_ATRIB_CLASS, function (match, comilla, valor) {
+          var nuevo = valor.split(/(\s+)/).map(function (trozo) {
+            var token = trozo.trim();
+            if (!token) return trozo;                       // conserva espacios/tabs
+            if (RE_CLASE_BLOQUEADA.test(token)) {
+              if (clasesDetectadas.indexOf(token) === -1) clasesDetectadas.push(token);
+              return 'seccion-destacada';
+            }
+            return trozo;
+          }).join('');
+          return 'class=' + comilla + nuevo + comilla;
+        });
+
+        if (clasesDetectadas.length) {
+          graves.push('Clases que Brave/Opera pueden ocultar: ' +
+            clasesDetectadas.map(function (c) { return '"' + c + '"'; }).join(', ') +
+            '. Se renombraron a "seccion-destacada".');
+        }
+
+        /* --- 2) Alturas rígidas con 100vh --- */
+        var rigidas = 0, suaves = 0;
+        limpio = limpio.replace(RE_ALTURA_VH, function (match, prop, valor) {
+          var p = prop.toLowerCase();
+          var nuevoValor = valor.replace(/100vh/gi, '100dvh');
+
+          if (p === 'height') {                 // height: 100vh  -> rígido
+            rigidas++;
+            return 'min-height: ' + nuevoValor;
+          }
+          if (p === 'min-height' || p === 'max-height') {  // solo mejora a dvh
+            suaves++;
+            return prop + ': ' + nuevoValor;
+          }
+          return match;                         // line-height, etc.: no se toca
+        });
+
+        if (rigidas) {
+          graves.push(rigidas + ' declaración(es) "height: 100vh" rígida(s): provocan ' +
+            'desbordamiento y saltos cuando aparece la barra del navegador móvil. ' +
+            'Se convirtieron a "min-height: 100dvh".');
+        }
+        if (suaves) {
+          avisos.push(suaves + ' declaración(es) "min/max-height: 100vh" actualizadas a ' +
+            '"100dvh" (unidad dinámica, se adapta a la barra de direcciones).');
+        }
+
+        /* --- 3) Revisión PWA (solo si parece un documento HTML) --- */
+        if (RE_DOC_HTML.test(src)) {
+          if (!RE_VIEWPORT.test(src)) {
+            graves.push('Falta <meta name="viewport" content="width=device-width, initial-scale=1">. ' +
+              'Sin ella la PWA se renderiza como escritorio en móvil.');
+          }
+          if (RE_ZOOM_BLOQUEADO.test(src)) {
+            avisos.push('El viewport usa user-scalable=no o maximum-scale=1: bloquea el zoom ' +
+              'y perjudica la accesibilidad.');
+          }
+          if (!RE_MANIFEST.test(src)) {
+            avisos.push('No se encontró <link rel="manifest">: sin manifest la app no es instalable como PWA.');
+          }
+        }
+
+        /* --- 4) Dictamen --- */
+        var dictamen;
+        if (graves.length === 0) {
+          dictamen = { clase: 'badge-success', etiqueta: 'CÓDIGO SALUDABLE',
+            texto: ' No se detectaron bloqueos ni errores graves de viewport.' };
+        } else if (graves.length <= 2) {
+          dictamen = { clase: 'badge-warning', etiqueta: 'CÓDIGO RESCATABLE',
+            texto: ' Hay pocos problemas: con el código sugerido queda listo.' };
+        } else {
+          dictamen = { clase: 'badge-danger', etiqueta: 'REFACTORIZAR',
+            texto: ' Demasiadas inconsistencias: conviene rehacer la maquetación.' };
+        }
+
+        /* --- 5) Pintar informe (sin innerHTML: a prueba de inyección) --- */
+        var detalle = document.getElementById('detallesReporte');
+        detalle.innerHTML = '';
+
+        var p = document.createElement('p');
+        p.appendChild(crearBadge(dictamen.etiqueta, dictamen.clase));
+        p.appendChild(document.createTextNode(dictamen.texto));
+        detalle.appendChild(p);
+
+        var ul = document.createElement('ul');
+        ul.className = 'reporte';
+
+        graves.forEach(function (t) { ul.appendChild(crearItem(t, 'GRAVE', 'badge-danger')); });
+        avisos.forEach(function (t) { ul.appendChild(crearItem(t, 'AVISO', 'badge-warning')); });
+
+        if (!graves.length && !avisos.length) {
+          var li = document.createElement('li');
+          li.appendChild(crearBadge('EXCELENTE', 'badge-success'));
+          li.appendChild(document.createTextNode(
+            'No se encontraron clases bloqueables, alturas rígidas ni problemas de viewport.'));
+          ul.appendChild(li);
+        }
+        detalle.appendChild(ul);
+
+        return { limpio: limpio, graves: graves.length, avisos: avisos.length };
+      }
+
+      /* ===================== EVENTOS ===================== */
+
+      var input        = document.getElementById('codigoInput');
+      var panel        = document.getElementById('panelResultado');
+      var salida       = document.getElementById('codigoSugerido');
+      var errorEntrada = document.getElementById('errorEntrada');
+      var msgCopiado   = document.getElementById('msgCopiado');
+
+      function ejecutarAnalisis() {
+        var src = input.value;
+        if (!src.trim()) {
+          errorEntrada.style.display = 'block';
+          panel.style.display = 'none';
+          input.focus();
+          return;
+        }
+        errorEntrada.style.display = 'none';
+
+        var resultado = analizar(src);
+        salida.value = resultado.limpio;
+        msgCopiado.textContent = '';
+        panel.style.display = 'block';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      document.getElementById('btnAnalizar').addEventListener('click', ejecutarAnalisis);
+
+      // Atajo: Ctrl + Enter
+      input.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          ejecutarAnalisis();
+        }
+      });
+
+      document.getElementById('btnCopiar').addEventListener('click', function () {
+        var texto = salida.value;
+        if (!texto) return;
+
+        function listo() {
+          msgCopiado.textContent = '✅ Copiado';
+          setTimeout(function () { msgCopiado.textContent = ''; }, 2000);
+        }
+        function respaldo() {
+          salida.removeAttribute('readonly');
+          salida.select();
+          try { document.execCommand('copy'); listo(); }
+          catch (err) { msgCopiado.textContent = 'No se pudo copiar'; }
+          salida.setAttribute('readonly', 'readonly');
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(texto).then(listo, respaldo);
+        } else {
+          respaldo();
+        }
+      });
+
+    })();
+    </script>
+    </body>
+    </html>
+
     <link rel="apple-touch-icon" href="img/logo.png">
 
     <!-- Librerías y Estilos -->

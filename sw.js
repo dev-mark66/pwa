@@ -1,4 +1,4 @@
-const CACHE_NAME = 'portafolio-v5'; // Versión 5 para forzar actualización
+const CACHE_NAME = 'portafolio-v5';
 const ARCHIVOS = [
   './',
   './index.html',
@@ -23,18 +23,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ESTRATEGIA: Primero intenta por red (para no quedarse offline), si falla usa caché
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // Si la respuesta es buena, la guardamos en caché
+
         if (response && response.status === 200 && response.type === 'basic') {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
         }
         return response;
       })
-      .catch(() => caches.match(event.request)) // Si falla la red, usa caché
+      .catch(() => caches.match(event.request))
   );
 });

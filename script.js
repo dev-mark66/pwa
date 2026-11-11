@@ -376,14 +376,14 @@ $(document).ready(function() {
         $('#toast').addClass('show');
         setTimeout(() => $('#toast').removeClass('show'), 3000);
 
-        console.log('💧 Interfaz hidratada con éxito.');
+        console.log(' Interfaz hidratada con éxito.');
     }
 
     // SIMULACIÓN INICIAL: La interfaz carga estática y a los 500ms se "hidrata"
     setTimeout(hidratarInterfaz, 500);
 
     // ==========================================
-    // BOTÓN MANUAL DE RE-HIDRATACIÓN
+    // BOTÓN MANUAL DE HIDRATACIÓN
     // ==========================================
     $('#hydrateBtn').on('click', function() {
         let $btn = $(this);
@@ -400,4 +400,22 @@ $(document).ready(function() {
         // 4. Esperamos 1 segundo (para que se vea la animación) y re-hidratamos
         setTimeout(hidratarInterfaz, 1000);
     });
+});
+// ==========================================
+// 13. ESTADO DE RED (ONLINE / OFFLINE)
+// ==========================================
+$(document).ready(function() {
+    function actualizarEstadoRed() {
+        if (navigator.onLine) {
+            $('#estadoRed').text('🟢 En Línea').css('background', '#dcfce7').css('color', '#166534');
+        } else {
+            $('#estadoRed').text('🟠 Modo Offline Activo').css('background', '#ffedd5').css('color', '#9a3412');
+        }
+    }
+
+    // Escuchar los eventos del navegador
+    $(window).on('online offline', actualizarEstadoRed);
+
+    // Ejecutar al iniciar la app
+    actualizarEstadoRed();
 });
